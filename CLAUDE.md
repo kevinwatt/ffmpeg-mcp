@@ -1,0 +1,78 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+FFmpeg MCP Server - An MCP (Model Context Protocol) server providing video and audio processing capabilities through FFmpeg.
+
+## Technology Stack
+
+- **Language**: Python 3.10+
+- **Framework**: FastMCP (from `mcp` package)
+- **Package Manager**: uv
+- **External Dependencies**: FFmpeg, FFprobe
+
+## Development Commands
+
+```bash
+# Install dependencies
+uv sync
+
+# Run the MCP server
+uv run ffmpeg-mcp
+
+# Run tests
+uv run pytest
+
+# Run a single test
+uv run pytest tests/test_info.py -v
+
+# Type checking
+uv run mypy src/
+
+# Linting
+uv run ruff check src/
+```
+
+## Architecture
+
+### Project Structure
+
+```
+src/ffmpeg_mcp/
+├── __init__.py      # Package entry, exports main()
+├── __main__.py      # Module entry point
+├── server.py        # MCP server initialization and tool registration
+├── config.py        # Configuration management (env vars, defaults)
+└── tools/           # One file per tool
+    ├── info.py      # ffmpeg_get_info
+    ├── convert.py   # ffmpeg_convert (with scale)
+    ├── compress.py  # ffmpeg_compress (with scale)
+    ├── trim.py      # ffmpeg_trim
+    ├── audio.py     # ffmpeg_extract_audio
+    ├── merge.py     # ffmpeg_merge
+    └── frames.py    # ffmpeg_extract_frames
+```
+
+### Tool Naming Convention
+
+All tools use `ffmpeg_` prefix to avoid conflicts with other MCP servers.
+
+### FFmpeg Execution Pattern
+
+Use `asyncio.create_subprocess_exec` for all FFmpeg/FFprobe calls. See `.claude/skills/mcp-builder/SKILL.md` for code patterns.
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `FFMPEG_PATH` | Path to ffmpeg binary | `ffmpeg` |
+| `FFPROBE_PATH` | Path to ffprobe binary | `ffprobe` |
+| `FFMPEG_OUTPUT_DIR` | Default output directory | `~/Downloads` |
+
+## Version Management
+
+Update version in two places:
+1. `pyproject.toml` - `version` field
+2. `src/ffmpeg_mcp/__init__.py` - `__version__` variable
